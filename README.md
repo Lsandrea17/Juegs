@@ -1,1 +1,1008 @@
-# Juegs
+# Jueg
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nave Espacial - Esquiva Meteoritos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px #00a8ff;
+            color: #00a8ff;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #a0d2ff;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            margin: 20px auto;
+            border: 3px solid #00a8ff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 168, 255, 0.5);
+            background: #000;
+        }
+        
+        #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .score-display {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff9d;
+            text-shadow: 0 0 5px rgba(0, 255, 157, 0.7);
+        }
+        
+        .speed-display {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 5px rgba(255, 204, 0, 0.7);
+        }
+        
+        .timer-display {
+            position: absolute;
+            top: 60px;
+            right: 15px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff66cc;
+            text-shadow: 0 0 5px rgba(255, 102, 204, 0.7);
+        }
+        
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 20;
+            transition: opacity 0.5s;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .screen h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #00a8ff;
+            text-shadow: 0 0 10px rgba(0, 168, 255, 0.7);
+        }
+        
+        .screen p {
+            font-size: 1.2rem;
+            max-width: 80%;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #00a8ff, #0097e6);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 168, 255, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 168, 255, 0.6);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .controls-info {
+            margin-top: 20px;
+            background: rgba(0, 168, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        
+        .leaderboard {
+            margin-top: 30px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .leaderboard h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #ffcc00;
+        }
+        
+        #leaderboard-list {
+            list-style: none;
+            text-align: left;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        #leaderboard-list li {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        #leaderboard-list li:nth-child(1) {
+            color: gold;
+            font-weight: bold;
+        }
+        
+        #leaderboard-list li:nth-child(2) {
+            color: silver;
+        }
+        
+        #leaderboard-list li:nth-child(3) {
+            color: #cd7f32; /* bronze */
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            background: rgba(0, 168, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+        }
+        
+        .instructions h3 {
+            color: #00ff9d;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            text-align: left;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 10px;
+            flex: 1;
+            margin: 0 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ff9d;
+            margin-top: 5px;
+        }
+        
+        .danger {
+            color: #ff4444 !important;
+            animation: pulse 0.8s infinite alternate;
+        }
+        
+        .sound-toggle {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 25;
+        }
+        
+        @keyframes pulse {
+            from { opacity: 1; }
+            to { opacity: 0.5; }
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            #game-container {
+                height: 400px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .game-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>NAVE ESPACIAL - SUPERVIVENCIA</h1>
+        <p class="subtitle">¡Recoge estrellas para aumentar tu tiempo y velocidad! Si el tiempo llega a cero, pierdes.</p>
+        
+        <div id="game-container">
+            <canvas id="game-canvas"></canvas>
+            
+            <div id="ui-overlay">
+                <div class="score-display">Puntuación: <span id="score">0</span></div>
+                <div class="speed-display">Velocidad: <span id="speed">1</span>x</div>
+                <div class="timer-display">Tiempo: <span id="timer">30.0</span>s</div>
+            </div>
+            
+            <button id="sound-toggle" class="sound-toggle">🔊</button>
+            
+            <div id="start-screen" class="screen">
+                <h2>MODO SUPERVIVENCIA</h2>
+                <p>¡Debes recolectar estrellas para mantener vivo el contador! Cada estrella te da más tiempo, pero también aumenta la velocidad de los meteoritos.</p>
+                <div class="controls-info">
+                    <p>CONTROLES:<br>Usa las flechas ← → ↑ ↓ o WASD para mover la nave</p>
+                </div>
+                <button id="start-btn" class="btn">INICIAR JUEGO</button>
+            </div>
+            
+            <div id="game-over-screen" class="screen hidden">
+                <h2>¡TIEMPO AGOTADO!</h2>
+                <p>Tu puntuación final: <span id="final-score">0</span></p>
+                <div class="controls">
+                    <button id="restart-btn" class="btn">JUGAR DE NUEVO</button>
+                    <button id="menu-btn" class="btn">MENÚ PRINCIPAL</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-stats">
+            <div class="stat">
+                <div>Estrellas Recolectadas</div>
+                <div class="stat-value" id="stars-collected">0</div>
+            </div>
+            <div class="stat">
+                <div>Meteoritos Esquivados</div>
+                <div class="stat-value" id="meteors-dodged">0</div>
+            </div>
+            <div class="stat">
+                <div>Mejor Puntuación</div>
+                <div class="stat-value" id="best-score">0</div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>CÓMO JUGAR</h3>
+            <ul>
+                <li>Mueve la nave con las teclas de flecha o WASD</li>
+                <li>Esquiva los meteoritos que se acercan</li>
+                <li>Recolecta estrellas para aumentar tu tiempo de juego</li>
+                <li>Cada estrella te da +5 segundos, pero aumenta la velocidad de los meteoritos</li>
+                <li>¡Si el contador llega a cero, pierdes!</li>
+            </ul>
+        </div>
+        
+        <div class="leaderboard">
+            <h3>MEJORES PUNTUACIONES</h3>
+            <ul id="leaderboard-list">
+                <!-- Las puntuaciones se cargarán dinámicamente -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Elementos del DOM
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const menuBtn = document.getElementById('menu-btn');
+        const scoreDisplay = document.getElementById('score');
+        const speedDisplay = document.getElementById('speed');
+        const timerDisplay = document.getElementById('timer');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const starsCollectedDisplay = document.getElementById('stars-collected');
+        const meteorsDodgedDisplay = document.getElementById('meteors-dodged');
+        const bestScoreDisplay = document.getElementById('best-score');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const soundToggle = document.getElementById('sound-toggle');
+
+        // Ajustar tamaño del canvas
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Variables del juego
+        let game = {
+            running: false,
+            score: 0,
+            speed: 1,
+            starsCollected: 0,
+            meteorsDodged: 0,
+            bestScore: localStorage.getItem('bestScore') || 0,
+            timer: 30.0, // Tiempo inicial
+            meteorSpeedMultiplier: 1, // Multiplicador de velocidad de meteoritos
+            starSpawnTimer: 0, // Temporizador para generar estrellas
+            soundEnabled: true
+        };
+
+        // Jugador
+        const player = {
+            x: 100,
+            y: canvas.height / 2,
+            width: 60,
+            height: 40,
+            speed: 5,
+            color: '#00a8ff'
+        };
+
+        // Arrays de objetos del juego
+        let meteors = [];
+        let stars = [];
+        let particles = [];
+        let engineParticles = [];
+
+        // Controles
+        const keys = {};
+
+        // Sonidos
+        const sounds = {
+            background: new Audio(),
+            collect: new Audio(),
+            engine: new Audio(),
+            explosion: new Audio(),
+            gameOver: new Audio()
+        };
+
+        // Configurar sonidos
+        function setupSounds() {
+            // Sonido de fondo (espacio)
+            sounds.background.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+            sounds.background.loop = true;
+            sounds.background.volume = 0.3;
+            
+            // Sonido de recolección de estrella
+            sounds.collect.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+            sounds.collect.volume = 0.5;
+            
+            // Sonido de motor
+            sounds.engine.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+            sounds.engine.loop = true;
+            sounds.engine.volume = 0.2;
+            
+            // Sonido de explosión
+            sounds.explosion.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+            sounds.explosion.volume = 0.7;
+            
+            // Sonido de game over
+            sounds.gameOver.src = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==";
+            sounds.gameOver.volume = 0.6;
+        }
+
+        // Alternar sonido
+        function toggleSound() {
+            game.soundEnabled = !game.soundEnabled;
+            soundToggle.textContent = game.soundEnabled ? "🔊" : "🔇";
+            
+            if (game.soundEnabled) {
+                if (game.running) {
+                    sounds.background.play().catch(e => console.log("Error reproduciendo sonido:", e));
+                    sounds.engine.play().catch(e => console.log("Error reproduciendo sonido:", e));
+                }
+            } else {
+                sounds.background.pause();
+                sounds.engine.pause();
+                sounds.collect.pause();
+                sounds.explosion.pause();
+                sounds.gameOver.pause();
+            }
+        }
+
+        // Inicializar el juego
+        function init() {
+            game.running = true;
+            game.score = 0;
+            game.speed = 1;
+            game.starsCollected = 0;
+            game.meteorsDodged = 0;
+            game.timer = 30.0;
+            game.meteorSpeedMultiplier = 1;
+            game.starSpawnTimer = 0;
+            
+            player.x = 100;
+            player.y = canvas.height / 2;
+            
+            meteors = [];
+            stars = [];
+            particles = [];
+            engineParticles = [];
+            
+            // Iniciar sonidos
+            if (game.soundEnabled) {
+                sounds.background.play().catch(e => console.log("Error reproduciendo sonido:", e));
+                sounds.engine.play().catch(e => console.log("Error reproduciendo sonido:", e));
+            }
+            
+            updateDisplays();
+            gameLoop();
+        }
+
+        // Bucle principal del juego
+        let lastTime = 0;
+        function gameLoop(timestamp) {
+            if (!game.running) return;
+            
+            // Calcular deltaTime
+            const deltaTime = timestamp - lastTime || 0;
+            lastTime = timestamp;
+            
+            update(deltaTime);
+            render();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Actualizar estado del juego
+        function update(deltaTime) {
+            // Convertir deltaTime a segundos
+            const deltaSeconds = deltaTime / 1000;
+            
+            // Actualizar temporizador global
+            game.timer -= deltaSeconds;
+            
+            // Verificar si se acabó el tiempo
+            if (game.timer <= 0) {
+                game.timer = 0;
+                gameOver();
+                return;
+            }
+            
+            // Actualizar display del temporizador
+            updateTimerDisplay();
+            
+            // Mover jugador
+            if (keys['ArrowUp'] || keys['w'] || keys['W']) {
+                player.y -= player.speed;
+                createEngineParticles();
+            }
+            if (keys['ArrowDown'] || keys['s'] || keys['S']) {
+                player.y += player.speed;
+                createEngineParticles();
+            }
+            if (keys['ArrowLeft'] || keys['a'] || keys['A']) {
+                player.x -= player.speed;
+                createEngineParticles();
+            }
+            if (keys['ArrowRight'] || keys['d'] || keys['D']) {
+                player.x += player.speed;
+                createEngineParticles();
+            }
+            
+            // Mantener al jugador dentro de los límites
+            player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+            player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
+            
+            // Generar estrellas continuamente
+            game.starSpawnTimer -= deltaSeconds;
+            if (game.starSpawnTimer <= 0) {
+                createStar();
+                // Reducir tiempo entre estrellas según la velocidad
+                game.starSpawnTimer = Math.max(0.5, 1.5 / game.speed);
+            }
+            
+            // Generar meteoritos (más frecuentes con mayor velocidad)
+            if (Math.random() < 0.03 * game.speed) {
+                createMeteor();
+            }
+            
+            // Actualizar meteoritos
+            for (let i = meteors.length - 1; i >= 0; i--) {
+                // Velocidad base multiplicada por el multiplicador de velocidad
+                meteors[i].x -= meteors[i].speed * game.meteorSpeedMultiplier;
+                
+                // Colisión con jugador
+                if (checkCollision(player, meteors[i])) {
+                    if (game.soundEnabled) {
+                        sounds.explosion.play().catch(e => console.log("Error reproduciendo sonido:", e));
+                    }
+                    gameOver();
+                    return;
+                }
+                
+                // Eliminar meteoritos que salen de pantalla
+                if (meteors[i].x + meteors[i].width < 0) {
+                    meteors.splice(i, 1);
+                    game.meteorsDodged++;
+                }
+            }
+            
+            // Actualizar estrellas
+            for (let i = stars.length - 1; i >= 0; i--) {
+                stars[i].x -= stars[i].speed * game.speed;
+                
+                // Colisión con jugador
+                if (checkCollision(player, stars[i])) {
+                    // Efectos de partículas
+                    createParticles(stars[i].x + stars[i].width/2, stars[i].y + stars[i].height/2, 10, '#ffcc00');
+                    
+                    // Reproducir sonido de recolección
+                    if (game.soundEnabled) {
+                        sounds.collect.play().catch(e => console.log("Error reproduciendo sonido:", e));
+                    }
+                    
+                    // Aumentar tiempo y puntuación
+                    game.timer += 5.0; // +5 segundos por estrella
+                    game.score += 50 * game.speed;
+                    game.starsCollected++;
+                    
+                    // Aumentar velocidad global y de meteoritos
+                    game.speed += 0.1;
+                    game.meteorSpeedMultiplier += 0.05;
+                    
+                    // Efecto visual al aumentar velocidad
+                    createParticles(player.x + player.width/2, player.y + player.height/2, 15, '#00ff9d');
+                    
+                    stars.splice(i, 1);
+                }
+                
+                // Eliminar estrellas que salen de pantalla
+                else if (stars[i].x + stars[i].width < 0) {
+                    stars.splice(i, 1);
+                }
+            }
+            
+            // Actualizar partículas
+            for (let i = particles.length - 1; i >= 0; i--) {
+                particles[i].x += particles[i].vx;
+                particles[i].y += particles[i].vy;
+                particles[i].life--;
+                
+                if (particles[i].life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            
+            // Actualizar partículas del motor
+            for (let i = engineParticles.length - 1; i >= 0; i--) {
+                engineParticles[i].x += engineParticles[i].vx;
+                engineParticles[i].y += engineParticles[i].vy;
+                engineParticles[i].life--;
+                
+                if (engineParticles[i].life <= 0) {
+                    engineParticles.splice(i, 1);
+                }
+            }
+            
+            // Aumentar puntuación con el tiempo
+            game.score += 0.1 * game.speed;
+            
+            // Actualizar displays
+            updateDisplays();
+        }
+
+        // Actualizar display del temporizador
+        function updateTimerDisplay() {
+            timerDisplay.textContent = game.timer.toFixed(1);
+            
+            // Cambiar color cuando el tiempo es crítico
+            if (game.timer < 10) {
+                timerDisplay.classList.add('danger');
+            } else {
+                timerDisplay.classList.remove('danger');
+            }
+        }
+
+        // Renderizar el juego
+        function render() {
+            // Limpiar canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Dibujar estrellas de fondo
+            drawBackground();
+            
+            // Dibujar partículas del motor
+            engineParticles.forEach(particle => {
+                drawParticle(particle);
+            });
+            
+            // Dibujar jugador
+            drawPlayer();
+            
+            // Dibujar meteoritos
+            meteors.forEach(meteor => {
+                drawMeteor(meteor);
+            });
+            
+            // Dibujar estrellas
+            stars.forEach(star => {
+                drawStar(star);
+            });
+            
+            // Dibujar partículas
+            particles.forEach(particle => {
+                drawParticle(particle);
+            });
+        }
+
+        // Dibujar jugador (nave espacial mejorada)
+        function drawPlayer() {
+            ctx.save();
+            ctx.translate(player.x, player.y);
+            
+            // Cuerpo principal de la nave
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.moveTo(player.width, player.height/2); // Punta
+            ctx.lineTo(0, player.height); // Parte inferior trasera
+            ctx.lineTo(player.width/3, player.height/2); // Centro inferior
+            ctx.lineTo(0, 0); // Parte superior trasera
+            ctx.closePath();
+            ctx.fill();
+            
+            // Ala izquierda
+            ctx.fillStyle = '#0097e6';
+            ctx.beginPath();
+            ctx.moveTo(player.width/3, player.height/2);
+            ctx.lineTo(0, player.height/3);
+            ctx.lineTo(0, 2*player.height/3);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Cabina
+            ctx.fillStyle = '#a0d2ff';
+            ctx.beginPath();
+            ctx.arc(player.width/2, player.height/2, player.width/6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Detalles de la cabina
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(player.width/2, player.height/2, player.width/8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+
+        // Dibujar meteorito
+        function drawMeteor(meteor) {
+            ctx.fillStyle = meteor.color;
+            ctx.beginPath();
+            ctx.arc(meteor.x + meteor.width/2, meteor.y + meteor.height/2, meteor.width/2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Detalles del meteorito
+            ctx.fillStyle = '#666';
+            ctx.beginPath();
+            ctx.arc(meteor.x + meteor.width/3, meteor.y + meteor.height/3, meteor.width/6, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Dibujar estrella
+        function drawStar(star) {
+            ctx.fillStyle = star.color;
+            
+            const centerX = star.x + star.width/2;
+            const centerY = star.y + star.height/2;
+            const outerRadius = star.width/2;
+            const innerRadius = star.width/4;
+            const spikes = 5;
+            
+            ctx.beginPath();
+            let rotation = Math.PI / 2 * 3;
+            let x = centerX;
+            let y = centerY;
+            let step = Math.PI / spikes;
+            
+            ctx.moveTo(centerX, centerY - outerRadius);
+            
+            for (let i = 0; i < spikes; i++) {
+                x = centerX + Math.cos(rotation) * outerRadius;
+                y = centerY + Math.sin(rotation) * outerRadius;
+                ctx.lineTo(x, y);
+                rotation += step;
+                
+                x = centerX + Math.cos(rotation) * innerRadius;
+                y = centerY + Math.sin(rotation) * innerRadius;
+                ctx.lineTo(x, y);
+                rotation += step;
+            }
+            
+            ctx.lineTo(centerX, centerY - outerRadius);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Brillo de la estrella
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, star.width/8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Dibujar partícula
+        function drawParticle(particle) {
+            ctx.fillStyle = particle.color;
+            ctx.globalAlpha = particle.life / particle.maxLife;
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        }
+
+        // Dibujar fondo estrellado
+        function drawBackground() {
+            ctx.fillStyle = '#fff';
+            for (let i = 0; i < 100; i++) {
+                const x = (i * 123) % canvas.width;
+                const y = (i * 321) % canvas.height;
+                const size = Math.random() * 1.5;
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Nebulosa de fondo
+            const gradient = ctx.createRadialGradient(
+                canvas.width/2, canvas.height/2, 0,
+                canvas.width/2, canvas.height/2, canvas.width/2
+            );
+            gradient.addColorStop(0, 'rgba(100, 50, 150, 0.1)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Crear meteorito
+        function createMeteor() {
+            const size = 20 + Math.random() * 30;
+            const meteor = {
+                x: canvas.width,
+                y: Math.random() * (canvas.height - size),
+                width: size,
+                height: size,
+                speed: 2 + Math.random() * 3,
+                color: `hsl(${Math.random() * 30 + 10}, 70%, 40%)`
+            };
+            meteors.push(meteor);
+        }
+
+        // Crear estrella
+        function createStar() {
+            const size = 15 + Math.random() * 10;
+            const star = {
+                x: canvas.width,
+                y: Math.random() * (canvas.height - size),
+                width: size,
+                height: size,
+                speed: 1 + Math.random() * 2,
+                color: '#ffcc00'
+            };
+            stars.push(star);
+        }
+
+        // Crear partículas
+        function createParticles(x, y, count, color) {
+            for (let i = 0; i < count; i++) {
+                const particle = {
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 4,
+                    vy: (Math.random() - 0.5) * 4,
+                    size: 2 + Math.random() * 3,
+                    color: color,
+                    life: 20 + Math.random() * 20,
+                    maxLife: 40
+                };
+                particles.push(particle);
+            }
+        }
+
+        // Crear partículas del motor
+        function createEngineParticles() {
+            for (let i = 0; i < 2; i++) {
+                const particle = {
+                    x: player.x - 5,
+                    y: player.y + player.height/2 + (Math.random() - 0.5) * 10,
+                    vx: -2 - Math.random() * 3,
+                    vy: (Math.random() - 0.5) * 2,
+                    size: 1 + Math.random() * 2,
+                    color: `hsl(${20 + Math.random() * 20}, 100%, 50%)`,
+                    life: 10 + Math.random() * 10,
+                    maxLife: 20
+                };
+                engineParticles.push(particle);
+            }
+        }
+
+        // Verificar colisión
+        function checkCollision(obj1, obj2) {
+            return obj1.x < obj2.x + obj2.width &&
+                   obj1.x + obj1.width > obj2.x &&
+                   obj1.y < obj2.y + obj2.height &&
+                   obj1.y + obj1.height > obj2.y;
+        }
+
+        // Actualizar displays
+        function updateDisplays() {
+            scoreDisplay.textContent = Math.floor(game.score);
+            speedDisplay.textContent = game.speed.toFixed(1);
+            starsCollectedDisplay.textContent = game.starsCollected;
+            meteorsDodgedDisplay.textContent = game.meteorsDodged;
+            bestScoreDisplay.textContent = Math.max(Math.floor(game.score), game.bestScore);
+        }
+
+        // Game over
+        function gameOver() {
+            game.running = false;
+            
+            // Detener sonidos
+            sounds.background.pause();
+            sounds.engine.pause();
+            
+            // Reproducir sonido de game over
+            if (game.soundEnabled) {
+                sounds.gameOver.play().catch(e => console.log("Error reproduciendo sonido:", e));
+            }
+            
+            // Actualizar mejor puntuación
+            if (game.score > game.bestScore) {
+                game.bestScore = Math.floor(game.score);
+                localStorage.setItem('bestScore', game.bestScore);
+            }
+            
+            // Actualizar leaderboard
+            updateLeaderboard();
+            
+            // Mostrar pantalla de game over
+            finalScoreDisplay.textContent = Math.floor(game.score);
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        // Actualizar leaderboard
+        function updateLeaderboard() {
+            // Obtener leaderboard del localStorage
+            let leaderboard = JSON.parse(localStorage.getItem('spaceSurvivalLeaderboard')) || [];
+            
+            // Agregar nueva puntuación
+            leaderboard.push({
+                score: Math.floor(game.score),
+                stars: game.starsCollected,
+                date: new Date().toLocaleDateString()
+            });
+            
+            // Ordenar y limitar a 5 mejores
+            leaderboard.sort((a, b) => b.score - a.score);
+            leaderboard = leaderboard.slice(0, 5);
+            
+            // Guardar en localStorage
+            localStorage.setItem('spaceSurvivalLeaderboard', JSON.stringify(leaderboard));
+            
+            // Actualizar visualización
+            leaderboardList.innerHTML = '';
+            leaderboard.forEach((entry, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${index + 1}. ${entry.score} pts</span><span>${entry.stars}★</span>`;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        // Configurar sonidos al cargar la página
+        setupSounds();
+
+        // Event listeners
+        startBtn.addEventListener('click', () => {
+            startScreen.classList.add('hidden');
+            init();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            gameOverScreen.classList.add('hidden');
+            init();
+        });
+
+        menuBtn.addEventListener('click', () => {
+            gameOverScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        });
+
+        soundToggle.addEventListener('click', toggleSound);
+
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+
+        // Inicializar leaderboard
+        updateLeaderboard();
+    </script>
+</body>
+</html>
