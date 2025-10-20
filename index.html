@@ -471,7 +471,6 @@
             soundToggle.textContent = game.soundEnabled ? "🔊" : "🔇";
             
             if (game.soundEnabled) {
-                console.log("El sonido esta activo");
                 if (game.running) {
                     sounds.background.play().catch(e => console.log("Error reproduciendo sonido:", e));
                     sounds.engine.play().catch(e => console.log("Error reproduciendo sonido:", e));
@@ -506,6 +505,7 @@
             
             // Iniciar sonidos
             if (game.soundEnabled) {
+                sounds.gameOver.pause();
                 sounds.background.play().catch(e => console.log("Error reproduciendo sonido:", e));
                 sounds.engine.play().catch(e => console.log("Error reproduciendo sonido:", e));
             }
