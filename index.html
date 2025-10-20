@@ -953,7 +953,7 @@
         }
 
         // Menu Principal
-        function startScreen() {
+        function MenuScreen() {
             startScreen.classList.remove('hidden');
 
             sounds.startscreen.play();
@@ -1003,7 +1003,7 @@
 
         menuBtn.addEventListener('click', () => {
             gameOverScreen.classList.add('hidden');
-            startScreen();
+            MenuScreen();
         });
 
         soundToggle.addEventListener('click', toggleSound);
